@@ -6,7 +6,7 @@
 `docker build -t ghcr.io/fiqrimaulanaar/testing/welcome .`
 
 # Run Image
-`docker run -p 8000:5000 testing/welcome`
+`docker run -d -p 8000:5000 testing/welcome`
 
 ## Run image menggunakan image yang ada di registry GitHub Packages
-`docker run -p 8000:5000 ghcr.io/fiqrimaulanaar/testing/welcome`
+`docker run -d -p 8000:5000 ghcr.io/fiqrimaulanaar/testing/welcome`
