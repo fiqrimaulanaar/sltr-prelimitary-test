@@ -1,3 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: welcome-app-config
+data:
+  environment: "production"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-secret
+type: Opaque
+data:
+  DB_HOST: bG9jYWxob3N0
+  DB_NAME: ZGJfdGVzdA==
+  DB_USER: YWRtaW4=
+  DB_PASS: YWRtaW4=
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,11 +34,44 @@ spec:
       labels:
         app: welcome-app
     spec:
+      volumes:
+        - name: welcome-app-config
+          configMap:
+            name: welcome-app-config
       containers:
         - name: welcome-app
           image: ghcr.io/fiqrimaulanaar/testing/welcome:latest
           ports:
             - containerPort: 5000
+          volumeMounts:
+            - name: welcome-app-config
+              mountPath: /app/config
+          env:
+            - name: env
+              valueFrom:
+                configMapKeyRef:
+                  name: welcome-app-config
+                  key: environment
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DB_HOST
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DB_NAME
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DB_USER
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DB_PASS
 
 ---
 apiVersion: v1
@@ -35,12 +87,33 @@ spec:
       targetPort: 5000
 
 ---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: tls-letsencrypt
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: tls-letsencrypt
+    solvers:
+      - http01:
+          ingress:
+            class: traefik
+
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: welcome-app-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: tls-letsencrypt
 
 spec:
+  tls:
+    - hosts:
+        - welcome-app.localhost
+      secretName: tls-letsencrypt
   rules:
     - host: welcome-app.localhost
       http:
