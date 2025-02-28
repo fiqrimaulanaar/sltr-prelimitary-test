@@ -112,7 +112,7 @@ metadata:
 spec:
   tls:
     - hosts:
-        - welcome-app.localhost
+        - welcome-app.localhost # ganti dengan domain yang valid
       secretName: tls-letsencrypt
   rules:
     - host: welcome-app.localhost
