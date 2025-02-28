@@ -1,0 +1,10 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: welcome-app
+    image: testing/welcome
+    restart: unless-stopped
+    ports: 
+      - ${APP_PORT}:5000
