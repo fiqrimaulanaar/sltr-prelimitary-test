@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: welcome-app
-    image: testing/welcome
+    image: ghcr.io/fiqrimaulanaar/testing/welcome:latest
     restart: unless-stopped
     ports: 
       - ${APP_PORT}:5000
