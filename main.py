@@ -1,4 +1,3 @@
-from typing import Optional
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -10,5 +9,5 @@ def welcome():
 
 
 @app.get("/welcome/{name}")
-def welcome_name(name: Optional[str]):
+def welcome_name(name: str):
     return f"Selamat datang {name}"
