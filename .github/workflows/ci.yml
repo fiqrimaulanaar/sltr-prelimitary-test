@@ -1,21 +1,38 @@
 name: "welcome app"
 
 on:
-  push:
-    branches: ["main"] 
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag Release"
+        required: true
+        default: "v1.0.0"
+      branch:
+        description: "Branch to deploy"
+        required: true
+        default: "main"
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
+      - name: Create Git tag
+        run: |
+          git fetch --tags
+          git tag -a ${{ github.event.inputs.tag }} -m "Release ${{ github.event.inputs.tag }}"
+          git push origin ${{ github.event.inputs.tag }}
+      
       - name: Docker build
-        run: docker build -t ghcr.io/fiqrimaulanaar/testing/welcome:latest .
+        run: |
+          docker build -t ghcr.io/fiqrimaulanaar/testing/welcome:latest .
+          docker build -t ghcr.io/fiqrimaulanaar/testing/welcome:${{ github.event.inputs.tag }} .
 
       - name: Docker login
         run: docker login --username fiqrimaulanaar --password ${{ secrets.PACKAGES_TOKEN }} ghcr.io
 
       - name: Docker push
-        run: docker push ghcr.io/fiqrimaulanaar/testing/welcome:latest
+        run: |
+          docker push ghcr.io/fiqrimaulanaar/testing/welcome:latest
+          docker push ghcr.io/fiqrimaulanaar/testing/welcome:${{ github.event.inputs.tag }}
