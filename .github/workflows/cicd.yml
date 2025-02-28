@@ -24,7 +24,7 @@ jobs:
           git config user.email "${{ secrets.EMAIL }}"
           git tag -a ${{ github.event.inputs.tag }} -m "Release ${{ github.event.inputs.tag }}"
           git push origin ${{ github.event.inputs.tag }}
-      
+
       - name: Docker build
         run: |
           docker build -t ghcr.io/fiqrimaulanaar/testing/welcome:latest .
@@ -37,3 +37,20 @@ jobs:
         run: |
           docker push ghcr.io/fiqrimaulanaar/testing/welcome:latest
           docker push ghcr.io/fiqrimaulanaar/testing/welcome:${{ github.event.inputs.tag }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /project/welcome-app
+            docker pull ghcr.io/fiqrimaulanaar/testing/welcome:${{ github.event.inputs.tag }}
+            docker compose down
+            docker compose up -d
+            exit
