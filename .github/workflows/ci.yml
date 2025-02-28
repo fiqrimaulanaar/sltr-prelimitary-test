@@ -20,7 +20,6 @@ jobs:
 
       - name: Create Git tag
         run: |
-          git fetch --tags
           git tag -a ${{ github.event.inputs.tag }} -m "Release ${{ github.event.inputs.tag }}"
           git push origin ${{ github.event.inputs.tag }}
       
